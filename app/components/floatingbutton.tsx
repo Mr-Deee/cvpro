@@ -2,9 +2,20 @@
 
 import React from "react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+type PHeader = {
+  Location: string;
+  fullname: string;
+  email: string;
+  github: string;
+  telephone: string;
+  portfolio: string;
+};
+
 type WorkExperience = {
-  companyName: string;
   jobTitle: string;
+  companyName: string;
   description: string;
   fromDate: string;
   toDate: string;
@@ -13,33 +24,58 @@ type WorkExperience = {
 export default function FloatingButtonDialog() {
   const [showDialog, setShowDialog] = useState(false);
   const [selectedOption, setSelectedOption] = React.useState("");
+  const [PHeaders, setPheader] = useState<PHeader[]>([]);
+
+
+   // State for the PHeader
+   const [formData, setFormData] = useState<PHeader>({
+    Location: "",
+    fullname: "",
+    email: "",
+    github: "",
+    telephone: "",
+    portfolio: "",
+  });
   const [workExperiences, setWorkExperiences] = useState<WorkExperience[]>([]);
   const [savedEntries, setSavedEntries] = useState<WorkExperience[]>([]);
   // const [workExperiences, setWorkExperiences] = useState([
   //   { companyName: "", jobTitle: "", description: "", fromDate: "", toDate: "" },
   // ]);
 
+  const router = useRouter();
 
   const openDialog = () => setShowDialog(true);
   const closeDialog = () => setShowDialog(false);
 
-
   const addWorkExperience = () => {
     setWorkExperiences([
       ...workExperiences,
-      { companyName: "", jobTitle: "", description: "", fromDate: "", toDate: "" },
+      {
+        companyName: "",
+        jobTitle: "",
+        description: "",
+        fromDate: "",
+        toDate: "",
+      },
     ]);
   };
 
+  const updatepheader = (
+    index: number,
+    field: keyof (typeof PHeaders)[0],
+    value: string
+  ) => {
+    setPheader((prev) =>
+      prev.map((head, i) => (i === index ? { ...head, [field]: value } : head))
+    );
+  };
   const updateWorkExperience = (
     index: number,
-    field: keyof typeof workExperiences[0],
+    field: keyof (typeof workExperiences)[0],
     value: string
   ) => {
     setWorkExperiences((prev) =>
-      prev.map((work, i) =>
-        i === index ? { ...work, [field]: value } : work
-      )
+      prev.map((work, i) => (i === index ? { ...work, [field]: value } : work))
     );
   };
   const removeWorkExperience = (index: number) => {
@@ -48,9 +84,15 @@ export default function FloatingButtonDialog() {
 
   const saveEntries = () => {
     setSavedEntries(workExperiences); // No more TypeScript error!
+    // Construct the query string
+    const queryString = new URLSearchParams({
+      entries: JSON.stringify(workExperiences),
+    }).toString();
+
+    router.push(`/?${queryString}`);
+
     closeDialog();
   };
-
 
   return (
     <div>
@@ -82,9 +124,8 @@ export default function FloatingButtonDialog() {
                 <option value="" className="text-black-700">
                   Select Option
                 </option>
-                <option value="Header" className="text-black">
-                  Header
-                </option>
+                <option value="PHeader">CV Header</option>
+
                 <option value="WorkExperience">Work Experience</option>
 
                 <option
@@ -97,23 +138,45 @@ export default function FloatingButtonDialog() {
               </select>
             </div>
 
-            {/* Conditional Content */}
-            {selectedOption === "Header" && (
-              <div>
-                <p className="text-black">Enter Full Name</p>
-                <input
-                  type="text"
-                  className="border border-gray-300 rounded w-full px-4 py-2 mb-4 text-black"
-                  placeholder="Enter some text"
-                />
-                <p className="text-black"> Enter E-mail</p>
 
-                <input
-                  type="text"
-                  className="border border-gray-300 rounded w-full px-4 py-2 mb-4 text-black"
-                  placeholder="Enter some text"
-                />
-              </div>
+            {selectedOption === "PHeader" && (
+
+
+            <div>
+
+    {PHeaders.length === 0 && (
+      <div className="mb-6 border-b border-gray-200 pb-6">
+        <p className="text-black">Enter Location</p>
+        <input
+          type="text"
+          className="border border-gray-300 rounded w-full px-4 py-2 mb-4 text-black"
+          placeholder="Enter Location"
+          value={formData.Location} // Default empty value
+          // onChange={(e) =>
+          
+         // }
+        />
+
+        <p className="text-black">Enter Full Name</p>
+        <input
+          type="text"
+          className="border border-gray-300 rounded w-full px-4 py-2 mb-4 text-black"
+          placeholder="Enter FullName"
+          value={formData.fullname} // Default empty value
+        />
+
+        <p className="text-black">Enter E-mail</p>
+        <input
+          type="text"
+          className="border border-gray-300 rounded w-full px-4 py-2 mb-4 text-black"
+          placeholder="Enter email"
+          value={formData.email} // Default empty value
+        />
+      </div>
+    )}
+
+  
+</div>
             )}
             {selectedOption === "Education" && (
               <input
@@ -123,8 +186,74 @@ export default function FloatingButtonDialog() {
               />
             )}
 
+
             {selectedOption === "WorkExperience" && (
               <div>
+                {/* Default Work Experience Form */}
+                {workExperiences.length === 0 && (
+                  <div className="mb-6 border-b border-gray-200 pb-6">
+                    {/* Company Name */}
+                    <input
+                      type="text"
+                      className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
+                      placeholder="Company Name"
+                      value={""} // Default empty value
+                      onChange={(e) =>
+                        setWorkExperiences([
+                          ...workExperiences,
+                          {
+                            companyName: e.target.value,
+                            jobTitle: "",
+                            description: "",
+                            fromDate: "",
+                            toDate: "",
+                          },
+                        ])
+                      }
+                    />
+
+                    {/* Job Title */}
+                    <input
+                      type="text"
+                      className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
+                      placeholder="Job Title"
+                      value={""} // Default empty value
+                      disabled
+                    />
+
+                    {/* Description */}
+                    <textarea
+                      className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
+                      placeholder="Description (use bullet points)"
+                      value={""} // Default empty value
+                      disabled
+                    />
+
+                    {/* Dates */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-gray-700 mb-2">From:</p>
+                        <input
+                          type="date"
+                          className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
+                          value={""} // Default empty value
+                          disabled
+                        />
+                      </div>
+                      <div>
+                        <p className="text-gray-700 mb-2">To:</p>
+                        <input
+                          type="date"
+                          className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
+                          value={""} // Default empty value
+                          disabled
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Existing Work Experiences */}
                 {workExperiences.map((work, index) => (
                   <div
                     key={index}
@@ -223,6 +352,7 @@ export default function FloatingButtonDialog() {
                 </button>
               </div>
             )}
+            
 
             {selectedOption === "otherContent" && (
               <p className="text-gray-700 mb-4">
