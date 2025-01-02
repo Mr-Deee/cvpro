@@ -17,61 +17,67 @@ type PHeader = {
   fullname: string;
   email: string;
   github: string;
-  telephone: string;
-  portfolio: string;
+  telephone?: string;
+  portfolio?: string;
 };
 
 export default function Home() {
   const searchParams = useSearchParams();
   const [entries, setEntries] = useState<WorkExperience[]>([]);
-  const [entries2, setEntries2] = useState<PHeader[]>([]);
+  const [entries2, setEntries2] = useState<PHeader[]>([
+    {
+      fullname: "",
+      Location: "",
+      email: "",
+      github: "",
+      telephone: "",
+      portfolio: "",
+    },
+  ]);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editedEntry, setEditedEntry] = useState(entries[0]);
+  const [editedEntry, setEditedEntry] = useState<WorkExperience | null>(null);
 
   const handleEdit = (index: number) => {
     setEditingIndex(index);
     setEditedEntry(entries[index]); // Set current entry to editable
   };
 
-useEffect(() => {
-  const queryEntries = searchParams.get("entries");
-  const queryEntries2 = searchParams.get("entries2");
+  useEffect(() => {
+    const queryEntries = searchParams.get("entries");
+    const queryEntries2 = searchParams.get("entries2");
 
-  if (queryEntries) setEntries(JSON.parse(queryEntries));
-  if (queryEntries2) setEntries2(JSON.parse(queryEntries2));
-}, [searchParams]);
-
-
+    try {
+      if (queryEntries) setEntries(JSON.parse(queryEntries));
+      if (queryEntries2) setEntries2(JSON.parse(queryEntries2));
+    } catch (error) {
+      console.error("Failed to parse entries:", error);
+    }
+  }, [searchParams]);
 
   return (
-    <div className=" items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <FloatingButtonDialog />
+    <div className="items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <FloatingButtonDialog
+        onSave={(header: PHeader, workExperience: WorkExperience[]) => {
+          setEntries2([header]); // Update header
+          setEntries(workExperience); // Update work experience
+        }}
+      />
 
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        {/* Render Header */}
         {entries2.map((head, index) => (
-          <div>
-            <div
-              key={index}
-              className="flex justify-between items-start mb-6 border-b pb-4 last:border-b-0"
-            >
-              {/* Left Section */}
-              <div className="w-1/3">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {head.fullname}
-                </h3>
-                <p className="text-gray-600 italic">{head.github}</p>
-                <p className="text-gray-500 mt-1">
-                  {/* {work.fromDate} - {work.toDate} */}
-                </p>
-              </div>
-            </div>
+          <div key={index} className="mb-4">
+            <h1 className="text-xl font-bold">{head.fullname || "Full Name"}</h1>
+            <p>{head.email || "Email not provided"}</p>
+            <p>{head.github || "GitHub not provided"}</p>
+            <p>{head.Location || "Location not provided"}</p>
+            <p>{head.telephone || "Telephone not provided"}</p>
+            <p>{head.portfolio || "Portfolio not provided"}</p>
           </div>
         ))}
 
+        {/* Render Experience Section */}
         <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl mx-auto my-10">
-          <h2 className="text-3xl font-bold mb-8 text-gray-900"></h2>
-
-          {/* Experience Section */}
           <h2 className="text-3xl font-bold mb-8 text-gray-900">Experience</h2>
           {entries.map((work, index) => (
             <div
@@ -79,7 +85,7 @@ useEffect(() => {
               className="flex justify-between items-start mb-6 border-b pb-4 last:border-b-0"
               onClick={() => handleEdit(index)} // Enable edit on click
             >
-              {editingIndex === index ? (
+              {editingIndex === index && editedEntry ? (
                 // Editable Mode
                 <div className="w-full flex flex-col gap-4">
                   <input
@@ -122,7 +128,10 @@ useEffect(() => {
                     type="text"
                     value={editedEntry.toDate}
                     onChange={(e) =>
-                      setEditedEntry({ ...editedEntry, toDate: e.target.value })
+                      setEditedEntry({
+                        ...editedEntry,
+                        toDate: e.target.value,
+                      })
                     }
                     className="border border-gray-300 rounded w-full px-4 py-2"
                     placeholder="To Date"
@@ -139,7 +148,14 @@ useEffect(() => {
                     placeholder="Description"
                   ></textarea>
                   <button
-                    // onClick={() => handleSave(index)}
+                    onClick={() => {
+                      const updatedEntries = [...entries];
+                      if (editingIndex !== null && editedEntry) {
+                        updatedEntries[editingIndex] = editedEntry;
+                        setEntries(updatedEntries);
+                        setEditingIndex(null);
+                      }
+                    }}
                     className="bg-blue-500 text-white px-4 py-2 rounded"
                   >
                     Save
@@ -171,55 +187,3 @@ useEffect(() => {
     </div>
   );
 }
-
-// {PHeaders.map((work, index) => (
-//   <div
-//     key={index}
-//     className="mb-6 border-b border-gray-200 pb-6"
-//   >
-//     {/* Full Name */}
-//     <input
-//       type="text"
-//       className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
-//       placeholder="Full Name"
-//       value={work.fullname}
-//       onChange={(e) =>
-//         updatepheader(index, "fullname", e.target.value)
-//       }
-//     />
-
-//     {/* Location */}
-//     <input
-//       type="text"
-//       className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
-//       placeholder="Location"
-//       value={work.Location}
-//       onChange={(e) =>
-//         updatepheader(index, "Location", e.target.value)
-//       }
-//     />
-
-//     {/* Email */}
-//     <input
-//       type="text"
-//       className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
-//       placeholder="Email"
-//       value={work.email}
-//       onChange={(e) =>
-//         updatepheader(index, "email", e.target.value)
-//       }
-//     />
-
-//     {/* GitHub */}
-//     <input
-//       type="text"
-//       className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
-//       placeholder="GitHub"
-//       value={work.github}
-//       onChange={(e) =>
-//         updatepheader(index, "github", e.target.value)
-//       }
-//     />
-//   </div>
-
-//
