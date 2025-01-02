@@ -9,8 +9,8 @@ type PHeader = {
   fullname: string;
   email: string;
   github: string;
-  telephone: string;
-  portfolio: string;
+  // telephone: string;
+  // portfolio: string;
 };
 
 type WorkExperience = {
@@ -26,18 +26,31 @@ export default function FloatingButtonDialog() {
   const [selectedOption, setSelectedOption] = React.useState("");
   const [PHeaders, setPheader] = useState<PHeader[]>([]);
 
+  // State for the PHeader
 
-   // State for the PHeader
-   const [formData, setFormData] = useState<PHeader>({
-    Location: "",
+  const [workExperiences, setWorkExperiences] = useState<WorkExperience[]>([]);
+
+  // const [newEntry, setNewEntry] = useState({
+  //   fullname: "",
+  //   Location: "",
+  //   email: "",
+  //   github: "",
+  // });
+
+
+
+  const [newEntry, setNewEntry] = useState<PHeader>({
     fullname: "",
+    Location: "",
     email: "",
     github: "",
-    telephone: "",
-    portfolio: "",
+   // telephone:"",
+    //portfolio:""
   });
-  const [workExperiences, setWorkExperiences] = useState<WorkExperience[]>([]);
+
   const [savedEntries, setSavedEntries] = useState<WorkExperience[]>([]);
+  const [savedEntries1, setSavedEntries1] = useState<PHeader[]>([]);
+
   // const [workExperiences, setWorkExperiences] = useState([
   //   { companyName: "", jobTitle: "", description: "", fromDate: "", toDate: "" },
   // ]);
@@ -69,6 +82,7 @@ export default function FloatingButtonDialog() {
       prev.map((head, i) => (i === index ? { ...head, [field]: value } : head))
     );
   };
+
   const updateWorkExperience = (
     index: number,
     field: keyof (typeof workExperiences)[0],
@@ -78,8 +92,21 @@ export default function FloatingButtonDialog() {
       prev.map((work, i) => (i === index ? { ...work, [field]: value } : work))
     );
   };
+
   const removeWorkExperience = (index: number) => {
     setWorkExperiences(workExperiences.filter((_, i) => i !== index));
+  };
+
+  const saveEntries1 = () => {
+    setSavedEntries1(PHeaders); // No more TypeScript error!
+    // Construct the query string
+    const queryString1 = new URLSearchParams({
+      entries: JSON.stringify(PHeaders),
+    }).toString();
+
+    router.push(`/?${queryString1}`);
+
+    closeDialog();
   };
 
   const saveEntries = () => {
@@ -137,47 +164,134 @@ export default function FloatingButtonDialog() {
                 <option value="otherContent">Show Other Content</option>
               </select>
             </div>
-
-
             {selectedOption === "PHeader" && (
+  <div>
+    {PHeaders.length === 0 ? (
+      <div>
+        <div className="mb-6 border-b border-gray-200 pb-6">
+          <input
+            type="text"
+            className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
+            placeholder="Full Name"
+            value={newEntry.fullname}
+            onChange={(e) =>
+              setNewEntry({ ...newEntry, fullname: e.target.value })
+            }
+          />
+          <input
+            type="text"
+            className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
+            placeholder="Location"
+            value={newEntry.Location}
+            onChange={(e) =>
+              setNewEntry({ ...newEntry, Location: e.target.value })
+            }
+          />
+          <input
+            type="text"
+            className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
+            placeholder="Email"
+            value={newEntry.email}
+            onChange={(e) =>
+              setNewEntry({ ...newEntry, email: e.target.value })
+            }
+          />
+          <input
+            type="text"
+            className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
+            placeholder="GitHub"
+            value={newEntry.github}
+            onChange={(e) =>
+              setNewEntry({ ...newEntry, github: e.target.value })
+            }
+          />
+       <button
+  className="bg-blue-500 text-white px-4 py-2 rounded"
+  onClick={() => {
 
+    saveEntries1
+    // if (
+    //   newEntry.fullname &&
+    //   newEntry.Location &&
+    //   newEntry.email &&
+    //   newEntry.github
+    // ) {
+    //   setPheader([...PHeaders, newEntry]); // Update headers
 
-            <div>
-
-    {PHeaders.length === 0 && (
-      <div className="mb-6 border-b border-gray-200 pb-6">
-        <p className="text-black">Enter Location</p>
-        <input
-          type="text"
-          className="border border-gray-300 rounded w-full px-4 py-2 mb-4 text-black"
-          placeholder="Enter Location"
-          value={formData.Location} // Default empty value
-          // onChange={(e) =>
-          
-         // }
-        />
-
-        <p className="text-black">Enter Full Name</p>
-        <input
-          type="text"
-          className="border border-gray-300 rounded w-full px-4 py-2 mb-4 text-black"
-          placeholder="Enter FullName"
-          value={formData.fullname} // Default empty value
-        />
-
-        <p className="text-black">Enter E-mail</p>
-        <input
-          type="text"
-          className="border border-gray-300 rounded w-full px-4 py-2 mb-4 text-black"
-          placeholder="Enter email"
-          value={formData.email} // Default empty value
-        />
+    //   // Navigate to another page with query parameters
+    //   router.push(
+    //     `/?fullname=${encodeURIComponent(
+    //       newEntry.fullname
+    //     )}&location=${encodeURIComponent(
+    //       newEntry.Location
+    //     )}&email=${encodeURIComponent(
+    //       newEntry.email
+    //     )}&github=${encodeURIComponent(newEntry.github)}`
+    //   );
+    
+  }}
+>
+  Add
+</button>
+        </div>
       </div>
+    ) : (
+      PHeaders.map((head, index) => (
+        <div key={index} className="mb-6 border-b border-gray-200 pb-6">
+          <input
+            type="text"
+            className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
+            placeholder="Full Name"
+            value={head.fullname}
+            onChange={(e) =>
+              updatepheader(index, "fullname", e.target.value)
+            }
+          />
+          <input
+            type="text"
+            className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
+            placeholder="Location"
+            value={head.Location}
+            onChange={(e) =>
+              updatepheader(index, "Location", e.target.value)
+            }
+          />
+          <input
+            type="text"
+            className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
+            placeholder="Email"
+            value={head.email}
+            onChange={(e) =>
+              updatepheader(index, "email", e.target.value)
+            }
+          />
+          <input
+            type="text"
+            className="border border-gray-300 rounded w-full px-4 py-2 mb-4"
+            placeholder="GitHub"
+            value={head.github}
+            onChange={(e) =>
+              updatepheader(index, "github", e.target.value)
+            }
+          />
+          <button
+            className="bg-red-500 text-white px-4 py-2 rounded"
+            onClick={() => {
+              const updatedPHeaders = PHeaders.filter((_, i) => i !== index);
+              setPheader(updatedPHeaders);
+              saveEntries1();
+            }}
+          >
+            Remove
+          </button>
+        </div>
+      ))
     )}
+  </div>
+)}
 
-  
-</div>
-            )}
+      
+            
             {selectedOption === "Education" && (
               <input
                 type="text"
@@ -185,7 +299,6 @@ export default function FloatingButtonDialog() {
                 placeholder="Enter some text"
               />
             )}
-
 
             {selectedOption === "WorkExperience" && (
               <div>
@@ -350,22 +463,21 @@ export default function FloatingButtonDialog() {
                 >
                   +
                 </button>
+
+                <button
+                  onClick={saveEntries}
+                  className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
+                >
+                  Add
+                </button>
               </div>
             )}
-            
 
             {selectedOption === "otherContent" && (
               <p className="text-gray-700 mb-4">
                 This is the other content displayed.
               </p>
             )}
-
-            <button
-              onClick={saveEntries}
-              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
-            >
-              Add
-            </button>
           </div>
         </div>
       )}
